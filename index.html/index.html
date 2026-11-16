@@ -45,7 +45,6 @@
   </div>
 
   <dialog id="duzenle-penceresi">
-     <dialog id="duzenle-penceresi">
     <h2>Haberi düzenle</h2>
     <input id="duzenle-baslik" placeholder="Haber başlığı">
     <textarea id="duzenle-ozet" placeholder="Kısa özet"></textarea>
@@ -64,7 +63,6 @@
       <button id="duzenle-kaydet-btn" onclick="duzenlemeyiKaydet()">Kaydet</button>
     </div>
   </dialog>
-  </dialog>
 
   <dialog id="sifre-penceresi">
     <h2>Şifreni değiştir</h2>
@@ -78,6 +76,12 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+  <script>
+    // jsdelivr yüklenmezse yedek kaynaktan dene
+    if (typeof supabase === "undefined") {
+      document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>');
+    }
+  </script>
   <script src="config.js"></script>
   <script src="app.js"></script>
   <script>

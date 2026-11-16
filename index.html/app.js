@@ -6,7 +6,7 @@ const RESIM_KOVASI = "haber-resimleri";
 const KATEGORILER = ["Genel", "Teknoloji", "Spor", "Ekonomi", "Eğlence", "Yerel"];
 
 let aktifKullanici = null;
-let duzenlenenId = null;
+let duzenlenenHaber = null;
 let seciliKategori = "Tümü";
 
 // Veritabanından çekilen bilgiler burada durur
@@ -81,6 +81,7 @@ function kategoriSecenekleriniDoldur() {
   let idler = ["kategori", "duzenle-kategori"];
   for (let i = 0; i < idler.length; i++) {
     let secim = document.getElementById(idler[i]);
+    if (!secim) continue;
     secim.innerHTML = "";
     for (let j = 0; j < KATEGORILER.length; j++) {
       let secenek = document.createElement("option");
@@ -93,6 +94,7 @@ function kategoriSecenekleriniDoldur() {
 
 function kategoriCubuguCiz() {
   let cubuk = document.getElementById("kategori-cubugu");
+  if (!cubuk) return;
   let hepsi = ["Tümü"].concat(KATEGORILER);
   let butonlar = [];
 
@@ -523,20 +525,6 @@ async function duzenlemeyiKaydet() {
     kaydetBtn.disabled = false;
     kaydetBtn.textContent = "Kaydet";
   }
-}
-
-  let { error } = await db
-    .from("haberler")
-    .update({ baslik: yeniBaslik, ozet: yeniOzet, kategori: yeniKategori })
-    .eq("id", duzenlenenId);
-
-  if (error) {
-    alert("Haber güncellenemedi: " + error.message);
-    return;
-  }
-
-  duzenlemeyiKapat();
-  haberleriGoster();
 }
 
 async function haberSil(haber) {
