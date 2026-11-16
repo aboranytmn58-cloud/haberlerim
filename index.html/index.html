@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Haber Uygulamam</title>
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8b1e1e">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Haberler">
+</head>
+<body>
+  <h1>Günün Haberleri</h1>
+
+  <div id="giris-alani" class="kart">
+    <h2>Giriş yap</h2>
+    <input id="eposta" type="email" placeholder="E-posta">
+    <input id="sifre" type="password" placeholder="Şifre">
+    <button onclick="girisYap()">Giriş Yap</button>
+  </div>
+
+  <div id="uygulama-alani" class="gizli">
+    <div class="ust-serit">
+      <span>Giriş yapan: <strong id="kullanici-eposta"></strong></span>
+      <div>
+        <button class="ikincil" onclick="sifrePenceresiniAc()">Şifre değiştir</button>
+        <button class="ikincil" onclick="cikisYap()">Çıkış</button>
+      </div>
+    </div>
+
+    <div class="kart">
+      <input id="baslik" placeholder="Haber başlığı">
+      <textarea id="ozet" placeholder="Kısa özet"></textarea>
+      <label class="dosya-etiketi" for="kategori">Kategori</label>
+      <select id="kategori"></select>
+      <label class="dosya-etiketi" for="resim">Resim (isteğe bağlı)</label>
+      <input id="resim" type="file" accept="image/*">
+      <button id="ekle-btn" onclick="haberEkle()">Haberi Ekle</button>
+    </div>
+
+    <div id="kategori-cubugu" class="kategori-cubugu"></div>
+    <div id="haberler"></div>
+  </div>
+
+  <dialog id="duzenle-penceresi">
+     <dialog id="duzenle-penceresi">
+    <h2>Haberi düzenle</h2>
+    <input id="duzenle-baslik" placeholder="Haber başlığı">
+    <textarea id="duzenle-ozet" placeholder="Kısa özet"></textarea>
+    <label class="dosya-etiketi" for="duzenle-kategori">Kategori</label>
+    <select id="duzenle-kategori"></select>
+
+    <img id="duzenle-onizleme" class="onizleme gizli" alt="Mevcut resim">
+    <label class="dosya-etiketi" for="duzenle-resim">Resmi değiştir (isteğe bağlı)</label>
+    <input id="duzenle-resim" type="file" accept="image/*">
+    <label id="resmi-kaldir-alani" class="onay-satiri gizli">
+      <input id="resmi-kaldir" type="checkbox"> Mevcut resmi kaldır
+    </label>
+
+    <div class="pencere-butonlar">
+      <button class="ikincil" onclick="duzenlemeyiKapat()">Vazgeç</button>
+      <button id="duzenle-kaydet-btn" onclick="duzenlemeyiKaydet()">Kaydet</button>
+    </div>
+  </dialog>
+  </dialog>
+
+  <dialog id="sifre-penceresi">
+    <h2>Şifreni değiştir</h2>
+    <input id="eski-sifre" type="password" placeholder="Mevcut şifre" autocomplete="current-password">
+    <input id="yeni-sifre" type="password" placeholder="Yeni şifre (en az 8 karakter)" autocomplete="new-password">
+    <input id="yeni-sifre-tekrar" type="password" placeholder="Yeni şifre (tekrar)" autocomplete="new-password">
+    <div class="pencere-butonlar">
+      <button class="ikincil" onclick="sifrePenceresiniKapat()">Vazgeç</button>
+      <button id="sifre-kaydet-btn" onclick="sifreyiDegistir()">Kaydet</button>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+</body>
+</html>
