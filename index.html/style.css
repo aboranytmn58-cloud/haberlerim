@@ -223,16 +223,24 @@ button:focus-visible { outline: 2px solid var(--ana-renk); outline-offset: 2px; 
 /* =====================================================
    Beğeni ve yorumlar
    ===================================================== */
-.begeni-satiri { margin-top: 14px; }
-.begeni-btn {
+.tepki-satiri {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.tepki-btn {
   background: var(--gri-zemin);
   color: var(--yazi);
+  border: 1px solid transparent;
+  font-size: 15px;
   font-weight: 500;
-  padding: 7px 16px;
+  padding: 5px 12px;
 }
-.begeni-btn.begenildi {
+.tepki-btn.aktif {
   background: var(--ana-renk-acik);
   color: var(--ana-renk);
+  border-color: var(--ana-renk);
   font-weight: 700;
 }
 

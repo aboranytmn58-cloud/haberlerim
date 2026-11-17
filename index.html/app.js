@@ -15,6 +15,9 @@ const KATEGORI_EMOJI = {
   "Yerel": "📍"
 };
 
+// Kullanılabilir tepkiler: istediğin gibi değiştirebilirsin (en fazla 6-7 tane öneririm)
+const TEPKILER = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+
 let aktifKullanici = null;
 let duzenlenenHaber = null;
 let seciliKategori = "Tümü";
@@ -140,27 +143,40 @@ function kategoriCubuguCiz() {
 }
 
 // ===== Ekranı oluşturan fonksiyonlar =====
-function begeniSatiriOlustur(haber, begeniler) {
-  let sayi = begeniler.length;
-  let begendiMi = false;
-  for (let i = 0; i < begeniler.length; i++) {
-    if (aktifKullanici && begeniler[i].user_id === aktifKullanici.id) {
-      begendiMi = true;
+// Emojideki görünmez "stil" işaretini (U+FE0F) atar, böylece ❤ ile ❤️ aynı sayılır
+function tepkiAnahtari(emoji) {
+  return emoji.replace(/\uFE0F/g, "");
+}
+
+function tepkiSatiriOlustur(haber, tepkiler) {
+  let satir = document.createElement("div");
+  satir.className = "tepki-satiri";
+
+  for (let i = 0; i < TEPKILER.length; i++) {
+    let emoji = TEPKILER[i];
+    let anahtar = tepkiAnahtari(emoji);
+    let sayi = 0;
+    let benimki = null;
+
+    for (let j = 0; j < tepkiler.length; j++) {
+      if (tepkiAnahtari(tepkiler[j].tepki || "") === anahtar) {
+        sayi++;
+        if (aktifKullanici && tepkiler[j].user_id === aktifKullanici.id) {
+          benimki = tepkiler[j];
+        }
+      }
     }
+
+    let btn = document.createElement("button");
+    btn.className = "tepki-btn" + (benimki ? " aktif" : "");
+    btn.textContent = sayi > 0 ? emoji + " " + sayi : emoji;
+    btn.onclick = function () {
+      btn.disabled = true;
+      tepkiDegistir(haber.id, emoji, benimki);
+    };
+    satir.append(btn);
   }
 
-  let satir = document.createElement("div");
-  satir.className = "begeni-satiri";
-
-  let btn = document.createElement("button");
-  btn.className = "begeni-btn" + (begendiMi ? " begenildi" : "");
-  btn.textContent = (begendiMi ? "♥ " : "♡ ") + sayi;
-  btn.onclick = function () {
-    btn.disabled = true;
-    begeniDegistir(haber.id, begendiMi);
-  };
-
-  satir.append(btn);
   return satir;
 }
 
@@ -254,7 +270,7 @@ function haberKutusuOlustur(haber, yorumlar, begeniler, resimAdresi) {
     kutu.append(resim);
   }
 
-  kutu.append(begeniSatiriOlustur(haber, begeniler));
+  kutu.append(tepkiSatiriOlustur(haber, begeniler));
 
   if (aktifKullanici && haber.user_id === aktifKullanici.id) {
     let butonlar = document.createElement("div");
@@ -605,23 +621,23 @@ async function yorumSil(id) {
   haberleriGoster();
 }
 
-// ===== Beğeni işlemleri =====
-async function begeniDegistir(haberId, begendiMi) {
+// ===== Tepki işlemleri =====
+// Tepkiye ilk basışta eklenir, ikinci basışta geri alınır
+async function tepkiDegistir(haberId, emoji, benimki) {
   let sonuc;
-  if (begendiMi) {
+  if (benimki) {
     sonuc = await db
       .from("begeniler")
       .delete()
-      .eq("haber_id", haberId)
-      .eq("user_id", aktifKullanici.id);
+      .eq("id", benimki.id);
   } else {
     sonuc = await db
       .from("begeniler")
-      .insert({ haber_id: haberId });
+      .insert({ haber_id: haberId, tepki: emoji });
   }
 
   if (sonuc.error) {
-    alert("Beğeni kaydedilemedi: " + sonuc.error.message);
+    alert("Tepki kaydedilemedi: " + sonuc.error.message);
   }
   haberleriGoster();
 }
