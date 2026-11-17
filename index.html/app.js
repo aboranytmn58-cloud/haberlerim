@@ -5,6 +5,16 @@ const RESIM_KOVASI = "haber-resimleri";
 // Kategori listesi: istediğin gibi değiştirebilirsin
 const KATEGORILER = ["Genel", "Teknoloji", "Spor", "Ekonomi", "Eğlence", "Yerel"];
 
+// Her kategorinin emojisi (yeni kategori eklersen buraya da ekleyebilirsin)
+const KATEGORI_EMOJI = {
+  "Genel": "📰",
+  "Teknoloji": "💻",
+  "Spor": "⚽",
+  "Ekonomi": "💰",
+  "Eğlence": "🎬",
+  "Yerel": "📍"
+};
+
 let aktifKullanici = null;
 let duzenlenenHaber = null;
 let seciliKategori = "Tümü";
@@ -24,6 +34,22 @@ function tarihYaz(metin) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+// "3 saat önce" gibi okunaklı zaman yazar
+function gecenZaman(metin) {
+  let fark = Math.floor((Date.now() - new Date(metin).getTime()) / 1000);
+  if (fark < 60) return "az önce";
+  if (fark < 3600) return Math.floor(fark / 60) + " dk önce";
+  if (fark < 86400) return Math.floor(fark / 3600) + " saat önce";
+  if (fark < 604800) return Math.floor(fark / 86400) + " gün önce";
+  return tarihYaz(metin);
+}
+
+// Kategori adının başına emoji ekler
+function kategoriEtiketi(ad) {
+  if (ad === "Tümü") return "✨ Tümü";
+  return (KATEGORI_EMOJI[ad] || "📌") + " " + ad;
 }
 
 function yazarAdi(eposta) {
@@ -86,7 +112,7 @@ function kategoriSecenekleriniDoldur() {
     for (let j = 0; j < KATEGORILER.length; j++) {
       let secenek = document.createElement("option");
       secenek.value = KATEGORILER[j];
-      secenek.textContent = KATEGORILER[j];
+      secenek.textContent = kategoriEtiketi(KATEGORILER[j]);
       secim.append(secenek);
     }
   }
@@ -102,7 +128,7 @@ function kategoriCubuguCiz() {
     let ad = hepsi[i];
     let btn = document.createElement("button");
     btn.className = "kategori-btn" + (ad === seciliKategori ? " secili" : "");
-    btn.textContent = ad;
+    btn.textContent = kategoriEtiketi(ad);
     btn.onclick = function () {
       seciliKategori = ad;
       kategoriCubuguCiz();
@@ -157,7 +183,8 @@ function yorumBolumuOlustur(haber, yorumlar) {
     let yazar = document.createElement("strong");
     yazar.textContent = yazarAdi(y.yazar);
     let tarih = document.createElement("span");
-    tarih.textContent = " · " + tarihYaz(y.created_at);
+    tarih.textContent = " · " + gecenZaman(y.created_at);
+    tarih.title = tarihYaz(y.created_at);
     ust.append(yazar, tarih);
 
     let metin = document.createElement("p");
@@ -201,7 +228,7 @@ function haberKutusuOlustur(haber, yorumlar, begeniler, resimAdresi) {
 
   let rozet = document.createElement("span");
   rozet.className = "rozet";
-  rozet.textContent = haber.kategori || "Genel";
+  rozet.textContent = kategoriEtiketi(haber.kategori || "Genel");
 
   let h2 = document.createElement("h2");
   h2.textContent = haber.baslik;
@@ -209,7 +236,8 @@ function haberKutusuOlustur(haber, yorumlar, begeniler, resimAdresi) {
   let tarih = document.createElement("p");
   tarih.className = "tarih";
   let yazar = haber.yazar ? yazarAdi(haber.yazar) : "bilinmiyor";
-  tarih.textContent = yazar + " · " + tarihYaz(haber.created_at);
+  tarih.textContent = yazar + " · " + gecenZaman(haber.created_at);
+  tarih.title = tarihYaz(haber.created_at);
 
   let ozet = document.createElement("p");
   ozet.className = "ozet";
@@ -620,7 +648,7 @@ async function cikisYap() {
 function oturumuUygula(oturum) {
   if (oturum) {
     aktifKullanici = oturum.user;
-    document.getElementById("kullanici-eposta").textContent = oturum.user.email;
+    document.getElementById("kullanici-eposta").textContent = yazarAdi(oturum.user.email);
     document.getElementById("giris-alani").classList.add("gizli");
     document.getElementById("uygulama-alani").classList.remove("gizli");
     kategoriCubuguCiz();
