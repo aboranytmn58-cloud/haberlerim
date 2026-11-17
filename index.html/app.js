@@ -21,6 +21,7 @@ const TEPKILER = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 let aktifKullanici = null;
 let duzenlenenHaber = null;
 let seciliKategori = "Tümü";
+let aramaMetni = "";
 
 // Veritabanından çekilen bilgiler burada durur
 let tumHaberler = [];
@@ -53,6 +54,27 @@ function gecenZaman(metin) {
 function kategoriEtiketi(ad) {
   if (ad === "Tümü") return "✨ Tümü";
   return (KATEGORI_EMOJI[ad] || "📌") + " " + ad;
+}
+
+// Küçük harfe çevirir, Türkçe harfleri sadeleştirir: "Öğrenci" -> "ogrenci"
+function aramaIcinSadelestir(metin) {
+  return (metin || "")
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i");
+}
+
+// Haber, aranan kelimelerin hepsini başlıkta, özette, yazarda ya da kategoride içeriyor mu?
+function haberAramayaUyuyor(haber, kelimeler) {
+  let yazar = haber.yazar ? haber.yazar.split("@")[0] : "";
+  let samanlik = aramaIcinSadelestir(
+    haber.baslik + " " + haber.ozet + " " + yazar + " " + (haber.kategori || "")
+  );
+  for (let i = 0; i < kelimeler.length; i++) {
+    if (samanlik.indexOf(kelimeler[i]) === -1) return false;
+  }
+  return true;
 }
 
 function yazarAdi(eposta) {
@@ -364,14 +386,31 @@ function haberleriCiz() {
     return;
   }
 
+  let kelimeler = aramaIcinSadelestir(aramaMetni)
+    .split(/\s+/)
+    .filter(function (k) { return k !== ""; });
+
   let gosterilecek = tumHaberler.filter(function (h) {
-    return seciliKategori === "Tümü" || h.kategori === seciliKategori;
+    let kategoriUyuyor = seciliKategori === "Tümü" || h.kategori === seciliKategori;
+    return kategoriUyuyor && (kelimeler.length === 0 || haberAramayaUyuyor(h, kelimeler));
   });
+
+  let sonucYazisi = document.getElementById("arama-sonuc");
+  if (kelimeler.length > 0) {
+    sonucYazisi.textContent = gosterilecek.length + " haber bulundu";
+    sonucYazisi.classList.remove("gizli");
+  } else {
+    sonucYazisi.classList.add("gizli");
+  }
 
   if (gosterilecek.length === 0) {
     let bos = document.createElement("p");
     bos.className = "bos";
-    bos.textContent = "Bu kategoride henüz haber yok.";
+    if (kelimeler.length > 0) {
+      bos.textContent = "“" + aramaMetni.trim() + "” için sonuç bulunamadı.";
+    } else {
+      bos.textContent = "Bu kategoride henüz haber yok.";
+    }
     liste.replaceChildren(bos);
     return;
   }
@@ -459,8 +498,10 @@ async function haberEkle() {
     document.getElementById("ozet").value = "";
     document.getElementById("resim").value = "";
 
-    // Yeni haber hemen görünsün diye filtreyi "Tümü"ne al
+    // Yeni haber hemen görünsün diye filtreleri temizle
     seciliKategori = "Tümü";
+    aramaMetni = "";
+    document.getElementById("arama").value = "";
     kategoriCubuguCiz();
     haberleriGoster();
   } catch (hata) {
@@ -673,6 +714,8 @@ function oturumuUygula(oturum) {
     aktifKullanici = null;
     tumHaberler = [];
     seciliKategori = "Tümü";
+    aramaMetni = "";
+    document.getElementById("arama").value = "";
     document.getElementById("giris-alani").classList.remove("gizli");
     document.getElementById("uygulama-alani").classList.add("gizli");
     document.getElementById("haberler").innerHTML = "";
@@ -749,6 +792,17 @@ kategoriSecenekleriniDoldur();
 
 document.getElementById("sifre").addEventListener("keydown", function (olay) {
   if (olay.key === "Enter") girisYap();
+});
+
+// Arama kutusu: her tuşta değil, yazmayı bıraktıktan kısa süre sonra ara
+let aramaZamanlayici = null;
+document.getElementById("arama").addEventListener("input", function (olay) {
+  let deger = olay.target.value;
+  clearTimeout(aramaZamanlayici);
+  aramaZamanlayici = setTimeout(function () {
+    aramaMetni = deger;
+    haberleriCiz();
+  }, 150);
 });
 
 db.auth.onAuthStateChange(function (olay, oturum) {

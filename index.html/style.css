@@ -185,6 +185,19 @@ button:focus-visible { outline: 2px solid var(--ana-renk); outline-offset: 2px; 
 .ust-serit button { font-size: 13px; padding: 7px 13px; }
 
 /* =====================================================
+   Arama
+   ===================================================== */
+.arama-alani { margin-bottom: 4px; }
+.arama-alani input {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  margin-bottom: 6px;
+}
+.arama-sonuc { margin: 0 0 4px 8px; font-size: 13px; color: var(--soluk); }
+
+/* =====================================================
    Kategoriler
    ===================================================== */
 .kategori-cubugu {
